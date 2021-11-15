@@ -1,5 +1,8 @@
 package;
 
+#if sys
+import smTools.SMFile;
+#end
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -77,6 +80,8 @@ class TitleState extends MusicBeatState
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
+		trace('hello');
+
 		// DEBUG BULLSHIT
 
 		super.create();
@@ -92,6 +97,9 @@ class TitleState extends MusicBeatState
 
 		KadeEngineData.initSave();
 
+		// var file:SMFile = SMFile.loadFile("file.sm");
+		// this was testing things
+		
 		Highscore.load();
 
 		if (FlxG.save.data.weekUnlocked != null)
@@ -173,7 +181,10 @@ class TitleState extends MusicBeatState
 		// logoBl.color = FlxColor.BLACK;
 
 		gfDance = new FlxSprite(FlxG.width * 0.4, FlxG.height * 0.07);
-		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
+		if (FlxG.save.data.campaign != null)
+			gfDance.frames = Paths.getSparrowAtlas( FlxG.save.data.campaign + '/gfDanceTitle');
+		else
+			gfDance.frames = Paths.getSparrowAtlas('aloe/gfDanceTitle');
 		gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
 		gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 		gfDance.antialiasing = true;
@@ -260,7 +271,7 @@ class TitleState extends MusicBeatState
 			FlxG.fullscreen = !FlxG.fullscreen;
 		}
 
-		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
+		var pressedEnter:Bool = controls.ACCEPT;
 
 		#if mobile
 		for (touch in FlxG.touches.list)
@@ -271,19 +282,6 @@ class TitleState extends MusicBeatState
 			}
 		}
 		#end
-
-		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
-
-		if (gamepad != null)
-		{
-			if (gamepad.justPressed.START)
-				pressedEnter = true;
-
-			#if switch
-			if (gamepad.justPressed.B)
-				pressedEnter = true;
-			#end
-		}
 
 		if (pressedEnter && !transitioning && skippedIntro)
 		{
@@ -322,17 +320,19 @@ class TitleState extends MusicBeatState
 						trace('outdated lmao! ' + returnedData[0] + ' != ' + MainMenuState.kadeEngineVer);
 						OutdatedSubState.needVer = returnedData[0];
 						OutdatedSubState.currChanges = returnedData[1];
+						if (FlxG.save.data.campaign == null)	// have to load something so the game is playable lul
+							FlxG.save.data.campaign = 'aloe';
 						FlxG.switchState(new OutdatedSubState());
 					}
+					else if (FlxG.save.data.campaign == null)
+						FlxG.switchState(new CharacterSelection());
 					else
-					{
 						FlxG.switchState(new MainMenuState());
-					}
 				}
 				
 				http.onError = function (error) {
 				  trace('error: $error');
-				  FlxG.switchState(new MainMenuState()); // fail but we go anyway
+				  FlxG.switchState(new CharacterSelection()); // fail but we go anyway
 				}
 				
 				http.request();

@@ -1,5 +1,6 @@
 package;
 
+import flixel.input.gamepad.FlxGamepad;
 import Controls.KeyboardScheme;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -39,7 +40,7 @@ class MainMenuState extends MusicBeatState
 
 	public static var nightly:String = "";
 
-	public static var kadeEngineVer:String = "1.5.2" + nightly;
+	public static var kadeEngineVer:String = "1.5.4" + nightly;
 	public static var gameVer:String = "0.2.7.1";
 
 	var magenta:FlxSprite;
@@ -60,7 +61,7 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
-		var bg:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image('menuBG'));
+		var bg:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(FlxG.save.data.campaign + '/menuBG'));
 		bg.scrollFactor.x = 0;
 		bg.scrollFactor.y = 0.10;
 		bg.setGraphicSize(Std.int(bg.width * 1.1));
@@ -72,7 +73,7 @@ class MainMenuState extends MusicBeatState
 		camFollow = new FlxObject(0, 0, 1, 1);
 		add(camFollow);
 
-		magenta = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
+		magenta = new FlxSprite(-80).loadGraphic(Paths.image(FlxG.save.data.campaign + '/menuDesat'));
 		magenta.scrollFactor.x = 0;
 		magenta.scrollFactor.y = 0.10;
 		magenta.setGraphicSize(Std.int(magenta.width * 1.1));
@@ -144,13 +145,29 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
-			if (controls.UP_P)
+			var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
+
+			if (gamepad != null)
+			{
+				if (gamepad.justPressed.DPAD_UP)
+				{
+					FlxG.sound.play(Paths.sound('scrollMenu'));
+					changeItem(-1);
+				}
+				if (gamepad.justPressed.DPAD_DOWN)
+				{
+					FlxG.sound.play(Paths.sound('scrollMenu'));
+					changeItem(1);
+				}
+			}
+
+			if (FlxG.keys.justPressed.UP)
 			{
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(-1);
 			}
 
-			if (controls.DOWN_P)
+			if (FlxG.keys.justPressed.DOWN)
 			{
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(1);
@@ -165,7 +182,7 @@ class MainMenuState extends MusicBeatState
 			{
 				if (optionShit[curSelected] == 'donate')
 				{
-					fancyOpenURL("https://www.kickstarter.com/projects/funkin/friday-night-funkin-the-full-ass-game");
+					fancyOpenURL("https://ninja-muffin24.itch.io/funkin");
 				}
 				else
 				{
